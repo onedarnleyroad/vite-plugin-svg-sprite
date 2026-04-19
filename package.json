@@ -1,6 +1,6 @@
 {
   "name": "@onedarnleyroad/vite-plugin-svg-sprite",
-  "version": "1.0.0",
+  "version": "2.0.0-beta.0",
   "description": "Vite plugin that builds an SVG sprite sheet from a directory of SVG files",
   "type": "module",
   "exports": {
