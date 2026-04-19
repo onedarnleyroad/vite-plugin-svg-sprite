@@ -6,9 +6,28 @@ function hashContent(content) {
     return createHash('sha256').update(content).digest('base64url').slice(0, 8)
 }
 
+const PROPAGATE_ATTRS = [
+    'fill', 'fill-opacity', 'fill-rule',
+    'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin',
+    'stroke-dasharray', 'stroke-dashoffset', 'stroke-miterlimit', 'stroke-opacity',
+    'color', 'opacity', 'style',
+]
+
+function extractOuterAttrs(svg) {
+    const openTag = svg.match(/<svg\b[^>]*>/i)?.[0] ?? ''
+    return PROPAGATE_ATTRS
+        .map(attr => {
+            const m = openTag.match(new RegExp(`\\s${attr}="([^"]*)"`, 'i'))
+            return m ? `${attr}="${m[1]}"` : null
+        })
+        .filter(Boolean)
+        .join(' ')
+}
+
 function buildSymbol(svg, name) {
     const existingTitle = svg.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim()
     const title = existingTitle ?? `${name} icon`
+    const outerAttrs = extractOuterAttrs(svg)
 
     const cleaned = svg
         .replace(/<!--[\s\S]*?-->/g, '')
@@ -30,7 +49,8 @@ function buildSymbol(svg, name) {
         .replace(/>\s+</g, '><')
         .trim()
 
-    return `<symbol id="svg-${name}" viewBox="${viewBox}"><title>${title}</title>${inner}</symbol>`
+    const attrs = `id="svg-${name}" viewBox="${viewBox}"${outerAttrs ? ' ' + outerAttrs : ''}`
+    return `<symbol ${attrs}><title>${title}</title>${inner}</symbol>`
 }
 
 function buildSpriteSvg(dir, files) {
