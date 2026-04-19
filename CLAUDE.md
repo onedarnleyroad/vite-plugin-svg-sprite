@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-`@onedarnleyroad/vite-plugin-svg-sprite` is a Vite plugin that builds one or more SVG sprite sheets from a directory of `.svg` files. Sprites are emitted with content-hashed filenames and registered in Vite's build manifest so downstream tools (nystudio107's Craft Vite plugin, etc.) can resolve the hashed URL via the plugin's logical key (`sprite.svg`, `sprite-{folder}.svg`).
+`@onedarnleyroad/vite-plugin-svg-sprite` is a Vite plugin that builds one or more SVG sprite sheets from a directory of `.svg` files. Sprites are emitted with content-hashed filenames and registered in Vite's build manifest under their `inputDir`-relative path (e.g. `src/icons/sprite.svg`) — this is the key downstream tools like nystudio107's Craft Vite plugin look up via `craft.vite.asset('src/icons/sprite.svg')`. The same path is also the URL the dev-mode middleware listens on, so dev and prod resolve identically.
 
 The entire plugin is implemented in [src/index.js](src/index.js). Zero dependencies beyond Node built-ins (`fs`, `path`, `crypto`).
 

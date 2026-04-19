@@ -98,8 +98,9 @@ export default function svgSpritePlugin(options = {}) {
                 const source = buildSpriteSvg(group.dir, group.files)
                 const base = group.logicalName.replace(/\.svg$/, '')
                 const hashedFileName = join(outputDir, `${base}-${hashContent(source)}.svg`)
+                const key = join(inputDir, group.logicalName)
                 this.emitFile({ type: 'asset', fileName: hashedFileName, source })
-                emitted.push({ logicalName: group.logicalName, fileName: hashedFileName })
+                emitted.push({ key, fileName: hashedFileName })
             }
         },
 
@@ -114,10 +115,10 @@ export default function svgSpritePlugin(options = {}) {
 
             const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'))
 
-            for (const { logicalName, fileName } of emitted) {
-                manifest[logicalName] = {
+            for (const { key, fileName } of emitted) {
+                manifest[key] = {
                     file: fileName,
-                    src: logicalName,
+                    src: key,
                     isEntry: false,
                 }
             }
@@ -131,7 +132,8 @@ export default function svgSpritePlugin(options = {}) {
             const rebuild = () => {
                 sprites.clear()
                 for (const group of collectSpriteGroups(inputDir, prefix)) {
-                    sprites.set(group.logicalName, buildSpriteSvg(group.dir, group.files))
+                    const key = join(inputDir, group.logicalName)
+                    sprites.set(key, buildSpriteSvg(group.dir, group.files))
                 }
             }
             rebuild()

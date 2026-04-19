@@ -82,28 +82,28 @@ Each SVG becomes a `<symbol>` with `id="svg-{filename}"`. For example, `arrow.sv
 
 ### With Vite manifest (recommended)
 
-With `build.manifest: true` enabled, each sprite is registered in `manifest.json` keyed by its logical name:
+With `build.manifest: true` enabled, each sprite is registered in `manifest.json` keyed by its `inputDir`-relative path:
 
 ```json
 {
-  "sprite.svg":       { "file": "assets/sprite-DAskUDYW.svg",       "src": "sprite.svg",       "isEntry": false },
-  "sprite-light.svg": { "file": "assets/sprite-light-xV7q1sYy.svg", "src": "sprite-light.svg", "isEntry": false }
+  "src/icons/sprite.svg":       { "file": "assets/sprite-DAskUDYW.svg",       "src": "src/icons/sprite.svg",       "isEntry": false },
+  "src/icons/sprite-light.svg": { "file": "assets/sprite-light-xV7q1sYy.svg", "src": "src/icons/sprite-light.svg", "isEntry": false }
 }
 ```
 
-With Craft CMS + [nystudio107/craft-vite](https://nystudio107.com/docs/vite/):
+With Craft CMS + [nystudio107/craft-vite](https://nystudio107.com/docs/vite/), use `craft.vite.asset()` — **not `entry()`**. The `asset()` helper is dev-server-aware; `entry()` always reads the manifest, so in dev it would serve stale built files:
 
 ```twig
 <svg aria-hidden="true">
-  <use href="{{ craft.vite.entry('sprite.svg') }}#svg-arrow"></use>
+  <use href="{{ craft.vite.asset('src/icons/sprite.svg') }}#svg-arrow"></use>
 </svg>
 
 <svg aria-hidden="true">
-  <use href="{{ craft.vite.entry('sprite-light.svg') }}#svg-sun"></use>
+  <use href="{{ craft.vite.asset('src/icons/sprite-light.svg') }}#svg-sun"></use>
 </svg>
 ```
 
-In dev mode, `craft.vite.entry('sprite.svg')` returns the raw path (`/sprite.svg`), which the plugin's dev middleware serves. In production it returns the hashed path from the manifest.
+In dev, `asset()` returns the Vite dev-server URL (e.g. `https://…:3000/src/icons/sprite.svg`), which the plugin's in-memory middleware serves. In production it returns the hashed URL from the manifest.
 
 ### Without manifest
 
