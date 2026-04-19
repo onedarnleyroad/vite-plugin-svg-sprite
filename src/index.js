@@ -6,28 +6,23 @@ function hashContent(content) {
     return createHash('sha256').update(content).digest('base64url').slice(0, 8)
 }
 
-const PROPAGATE_ATTRS = [
-    'fill', 'fill-opacity', 'fill-rule',
-    'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin',
-    'stroke-dasharray', 'stroke-dashoffset', 'stroke-miterlimit', 'stroke-opacity',
-    'color', 'opacity', 'style',
-]
+const STRIP_ATTRS = new Set(['xmlns', 'version', 'width', 'height', 'id'])
 
-function extractOuterAttrs(svg) {
-    const openTag = svg.match(/<svg\b[^>]*>/i)?.[0] ?? ''
-    return PROPAGATE_ATTRS
-        .map(attr => {
-            const m = openTag.match(new RegExp(`\\s${attr}="([^"]*)"`, 'i'))
-            return m ? `${attr}="${m[1]}"` : null
-        })
-        .filter(Boolean)
-        .join(' ')
+function extractOuterAttrs(openTag) {
+    const attrRe = /\s+([a-zA-Z_][a-zA-Z0-9_:-]*)="([^"]*)"/g
+    const kept = []
+    let m
+    while ((m = attrRe.exec(openTag)) !== null) {
+        const [, attr, value] = m
+        if (STRIP_ATTRS.has(attr) || attr.startsWith('xmlns:')) continue
+        kept.push(`${attr}="${value}"`)
+    }
+    return kept.join(' ')
 }
 
 function buildSymbol(svg, name) {
     const existingTitle = svg.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim()
     const title = existingTitle ?? `${name} icon`
-    const outerAttrs = extractOuterAttrs(svg)
 
     const cleaned = svg
         .replace(/<!--[\s\S]*?-->/g, '')
@@ -40,7 +35,8 @@ function buildSymbol(svg, name) {
         .replace(/\bhref="#([^"]+)"/g, `href="#${name}-$1"`)
         .replace(/\bxlink:href="#([^"]+)"/g, `xlink:href="#${name}-$1"`)
 
-    const viewBox = namespaced.match(/viewBox="([^"]+)"/)?.[1] ?? '0 0 24 24'
+    const openTag = namespaced.match(/<svg\b[^>]*>/i)?.[0] ?? ''
+    const outerAttrs = extractOuterAttrs(openTag)
 
     const inner = namespaced
         .replace(/<svg[^>]*>/i, '')
@@ -49,7 +45,7 @@ function buildSymbol(svg, name) {
         .replace(/>\s+</g, '><')
         .trim()
 
-    const attrs = `id="svg-${name}" viewBox="${viewBox}"${outerAttrs ? ' ' + outerAttrs : ''}`
+    const attrs = `id="svg-${name}"${outerAttrs ? ' ' + outerAttrs : ''}`
     return `<symbol ${attrs}><title>${title}</title>${inner}</symbol>`
 }
 

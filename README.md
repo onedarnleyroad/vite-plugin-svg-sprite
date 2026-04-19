@@ -9,7 +9,7 @@ A Vite plugin that builds SVG sprite sheets from a directory of SVG files — wi
 - **Vite manifest integration** — works out of the box with [nystudio107's Craft Vite plugin](https://nystudio107.com/docs/vite/) and any other manifest consumer
 - **Multiple sprites from subfolders** — organise icons into `light/`, `dark/`, etc. and get one sprite per folder
 - Namespaces internal IDs to prevent conflicts across icons
-- **Preserves presentation attributes** (`fill`, `stroke`, `stroke-width`, `opacity`, `style`, …) from the outer `<svg>` so `fill="currentColor"` and friends keep working
+- **Preserves outer `<svg>` attributes** on the generated `<symbol>` — `fill="currentColor"`, `stroke`, `class`, `role`, `aria-*`, `data-*`, `style` (including CSS custom properties), etc. Only the truly wrapper-specific attributes are stripped: `xmlns`, `version`, `width`, `height`, and `id` (we set our own).
 - Preserves existing `<title>` elements, or falls back to the filename
 - Strips comments and empty `<defs>` blocks
 - Dev server serves sprites from memory with full-reload on change
