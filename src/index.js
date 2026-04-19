@@ -3,7 +3,7 @@ import { resolve, basename, extname, join } from 'path'
 import { createHash } from 'crypto'
 
 function hashContent(content) {
-    return createHash('sha256').update(content).digest('base64url').slice(0, 8)
+    return createHash('sha256').update(content).digest('hex').slice(0, 8)
 }
 
 const STRIP_ATTRS = new Set(['xmlns', 'version', 'width', 'height', 'id'])
@@ -161,6 +161,7 @@ export default function svgSpritePlugin(options = {}) {
                 if (!match) return next()
                 res.setHeader('Content-Type', 'image/svg+xml')
                 res.setHeader('Cache-Control', 'no-cache')
+                res.setHeader('Access-Control-Allow-Origin', '*')
                 res.end(match)
             })
 
