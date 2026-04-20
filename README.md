@@ -12,7 +12,6 @@ A Vite plugin that builds SVG sprite sheets from a directory of SVG files — wi
 - **Preserves outer `<svg>` attributes** on the generated `<symbol>` — `fill="currentColor"`, `stroke`, `class`, `role`, `aria-*`, `data-*`, `style` (including CSS custom properties), etc. Only the truly wrapper-specific attributes are stripped: `xmlns`, `version`, `width`, `height`, and `id` (we set our own).
 - Preserves existing `<title>` elements, or falls back to the filename
 - Strips comments and empty `<defs>` blocks
-- Dev server serves sprites from memory with full-reload on change
 
 ## Installation
 
@@ -92,19 +91,29 @@ With `build.manifest: true` enabled, each sprite is registered in `manifest.json
 }
 ```
 
-With Craft CMS + [nystudio107/craft-vite](https://nystudio107.com/docs/vite/), use `craft.vite.asset()` — **not `entry()`**. The `asset()` helper is dev-server-aware; `entry()` always reads the manifest, so in dev it would serve stale built files:
+With Craft CMS + [nystudio107/craft-vite](https://nystudio107.com/docs/vite/):
 
 ```twig
 <svg aria-hidden="true">
-  <use href="{{ craft.vite.asset('src/icons/sprite.svg') }}#svg-arrow"></use>
+  <use href="{{ craft.vite.entry('src/icons/sprite.svg') }}#svg-arrow"></use>
 </svg>
 
 <svg aria-hidden="true">
-  <use href="{{ craft.vite.asset('src/icons/sprite-light.svg') }}#svg-sun"></use>
+  <use href="{{ craft.vite.entry('src/icons/sprite-light.svg') }}#svg-sun"></use>
 </svg>
 ```
 
-In dev, `asset()` returns the Vite dev-server URL (e.g. `https://…:3000/src/icons/sprite.svg`), which the plugin's in-memory middleware serves. In production it returns the hashed URL from the manifest.
+`entry()` resolves the hashed URL from the manifest.
+
+## Development workflow
+
+Sprites are generated at build time only — the plugin does **not** run during `vite dev`. For a live-ish dev loop, run a separate build watcher alongside your usual dev server:
+
+```bash
+vite build --watch
+```
+
+Every edit under `inputDir` triggers a rebuild (a second or two), updates `manifest.json` with the new content hash, and `craft.vite.entry('src/icons/sprite.svg')` picks up the new URL on the next request. Not instant HMR, but avoids the CORS / cross-origin complications of trying to serve sprites through a separate dev port.
 
 ### Without manifest
 

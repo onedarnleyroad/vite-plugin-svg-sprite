@@ -97,7 +97,6 @@ export default function svgSpritePlugin(options = {}) {
         throw new Error('[vite-plugin-svg-sprite] `inputDir` is required.')
     }
 
-    const absInputDir = resolve(inputDir)
     const emitted = []
     let viteConfig
 
@@ -140,41 +139,6 @@ export default function svgSpritePlugin(options = {}) {
             }
 
             writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
-        },
-
-        configureServer(server) {
-            const sprites = new Map()
-
-            const rebuild = () => {
-                sprites.clear()
-                for (const group of collectSpriteGroups(inputDir, prefix)) {
-                    const key = join(inputDir, group.logicalName)
-                    sprites.set(key, buildSpriteSvg(group.dir, group.files))
-                }
-            }
-            rebuild()
-
-            server.middlewares.use((req, res, next) => {
-                const path = req.url?.split('?')[0]?.replace(/^\//, '')
-                if (!path) return next()
-                const match = sprites.get(path)
-                if (!match) return next()
-                res.setHeader('Content-Type', 'image/svg+xml')
-                res.setHeader('Cache-Control', 'no-cache')
-                res.setHeader('Access-Control-Allow-Origin', '*')
-                res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
-                res.end(match)
-            })
-
-            server.watcher.add(absInputDir)
-            const onChange = file => {
-                if (!file.startsWith(absInputDir)) return
-                rebuild()
-                server.ws.send({ type: 'full-reload' })
-            }
-            server.watcher.on('change', onChange)
-            server.watcher.on('add', onChange)
-            server.watcher.on('unlink', onChange)
         },
     }
 }

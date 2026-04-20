@@ -45,12 +45,9 @@ Passing `outputFile` (the v1 option) throws a migration error.
 3. `this.emitFile({ type: 'asset', fileName: '{outputDir}/{base}-{hash}.svg', source })` writes the asset at the exact path we chose.
 4. In `writeBundle`, if `build.manifest` is truthy, we read the manifest Vite just wrote (`.vite/manifest.json` or the custom path from `build.manifest` when it's a string), merge our entries keyed by logical name, and write it back. Vite's built-in manifest plugin does **not** include emitted assets unless they're imported by a chunk, so this post-hoc merge is necessary.
 
-### Dev pipeline (`configureServer`)
+### Dev mode
 
-- Sprites are built in-memory into a `Map<logicalName, svg>` — no disk writes in dev.
-- A middleware intercepts `GET /{logicalName}` and returns the SVG with `Cache-Control: no-cache`.
-- `server.watcher` is extended to cover `inputDir`; on any change/add/unlink, sprites are rebuilt and `server.ws.send({ type: 'full-reload' })` fires.
-- In dev, `craft.vite.entry('sprite.svg')` returns the raw `/sprite.svg` path, which this middleware serves.
+The plugin is **build-only** — no `configureServer`, no dev middleware. For a live-ish dev loop users run `vite build --watch` alongside their normal dev server. A previous version tried to serve sprites via an in-memory dev middleware, but cross-origin constraints (CORS + CORP) in setups like DDEV + Craft made it unreliable; a plain `--watch` loop is simpler and works everywhere.
 
 ### Symbol generation — the subtle part
 
