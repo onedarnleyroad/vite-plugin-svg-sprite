@@ -14,7 +14,7 @@ The entire plugin is implemented in [src/index.js](src/index.js). Zero dependenc
 - No `scripts`, no build step, no test suite, no linter
 - Single export: `"." → "./src/index.js"`
 - Peer dependency: Vite ≥ 4.0.0
-- Current version: **2.0.0** (breaking change from v1 — see README migration note)
+- Current major: **v2** (breaking change from v1 — see README migration note). Check `package.json` for the exact version; v2 is currently shipping as beta tags on npm.
 
 ## API
 

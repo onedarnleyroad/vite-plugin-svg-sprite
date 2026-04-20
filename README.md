@@ -46,7 +46,7 @@ export default defineConfig({
 | `outputDir` | `string` | `'assets'` | Output directory, relative to Vite's `build.outDir`.                         |
 | `prefix`    | `string` | `'sprite'` | Filename prefix. The dash between prefix and folder name is always added. |
 
-All paths are resolved relative to the project root.
+`inputDir` is resolved relative to the project root; `outputDir` is resolved relative to Vite's `build.outDir`.
 
 ## Subfolders
 
