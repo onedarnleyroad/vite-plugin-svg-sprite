@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-`@onedarnleyroad/vite-plugin-svg-sprite` is a Vite plugin that builds one or more SVG sprite sheets from a directory of `.svg` files. Sprites are emitted with content-hashed filenames and registered in Vite's build manifest under their `inputDir`-relative path (e.g. `src/icons/sprite.svg`) — this is the key downstream tools like nystudio107's Craft Vite plugin look up via `craft.vite.asset('src/icons/sprite.svg')`. The same path is also the URL the dev-mode middleware listens on, so dev and prod resolve identically.
+`@onedarnleyroad/vite-plugin-svg-sprite` is a Vite plugin that builds one or more SVG sprite sheets from a directory of `.svg` files. Sprites are emitted with content-hashed filenames and registered in Vite's build manifest under a purely logical key — `{prefix}.svg` for the root sprite, `{folder}/{prefix}.svg` for each subfolder sprite. These keys are the handle downstream tools like nystudio107's Craft Vite plugin look up via `craft.vite.entry('sprite.svg')`; they don't correspond to any real file on disk.
 
 The entire plugin is implemented in [src/index.js](src/index.js). Zero dependencies beyond Node built-ins (`fs`, `path`, `crypto`).
 
@@ -34,16 +34,23 @@ Passing `outputFile` (the v1 option) throws a migration error.
 
 `collectSpriteGroups(inputDir, prefix)` scans `inputDir` one level deep:
 
-- Loose `.svg` files at the root → one group with `logicalName = '{prefix}.svg'`
-- Each subfolder containing `.svg` files → one group with `logicalName = '{prefix}-{folder}.svg'`
-- Empty subfolders are skipped; recursion does **not** go past one level
+Each group has two separate identifiers:
+
+- `key` — the logical manifest handle: `{prefix}.svg` for the root group, `{folder}/{prefix}.svg` for each subfolder group.
+- `fileBase` — the on-disk basename prefix: `{prefix}` for root, `{prefix}-{folder}` for subfolders. Hashing and `outputDir` are applied to this, so all emitted files land flat under `assets/`.
+
+Rules:
+
+- Loose `.svg` files at `inputDir` root → one group.
+- Each immediate subfolder containing `.svg` files → one group.
+- Empty subfolders are skipped; recursion does **not** go past one level.
 
 ### Build pipeline (`generateBundle` + `writeBundle`)
 
 1. For each group, `buildSpriteSvg` produces the full `<svg>…</svg>` string.
-2. A short content hash (`sha256 → base64url → 8 chars`) is computed ourselves — we can't rely on Vite's auto-hashing via `name:` because Vite's `assetFileNames` pattern discards any directory we put there, so we use `fileName:` instead and own the path + hash.
-3. `this.emitFile({ type: 'asset', fileName: '{outputDir}/{base}-{hash}.svg', source })` writes the asset at the exact path we chose.
-4. In `writeBundle`, if `build.manifest` is truthy, we read the manifest Vite just wrote (`.vite/manifest.json` or the custom path from `build.manifest` when it's a string), merge our entries keyed by logical name, and write it back. Vite's built-in manifest plugin does **not** include emitted assets unless they're imported by a chunk, so this post-hoc merge is necessary.
+2. A short content hash (`sha256 → hex → 8 chars`) is computed ourselves — we can't rely on Vite's auto-hashing via `name:` because Vite's `assetFileNames` pattern discards any directory we put there, so we use `fileName:` instead and own the path + hash.
+3. `this.emitFile({ type: 'asset', fileName: '{outputDir}/{fileBase}-{hash}.svg', source })` writes the asset at the exact path we chose.
+4. In `writeBundle`, if `build.manifest` is truthy, we read the manifest Vite just wrote (`.vite/manifest.json` or the custom path from `build.manifest` when it's a string), merge our entries keyed by logical `key`, and write it back. Vite's built-in manifest plugin does **not** include emitted assets unless they're imported by a chunk, so this post-hoc merge is necessary.
 
 ### Dev mode
 

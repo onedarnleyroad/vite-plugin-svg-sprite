@@ -68,7 +68,12 @@ function collectSpriteGroups(inputDir, prefix) {
         .filter(e => e.isFile() && e.name.toLowerCase().endsWith('.svg'))
         .map(e => e.name)
     if (rootFiles.length > 0) {
-        groups.push({ logicalName: `${prefix}.svg`, dir: absInput, files: rootFiles })
+        groups.push({
+            key: `${prefix}.svg`,
+            fileBase: prefix,
+            dir: absInput,
+            files: rootFiles,
+        })
     }
 
     for (const entry of entries) {
@@ -78,7 +83,12 @@ function collectSpriteGroups(inputDir, prefix) {
             .filter(e => e.isFile() && e.name.toLowerCase().endsWith('.svg'))
             .map(e => e.name)
         if (subFiles.length === 0) continue
-        groups.push({ logicalName: `${prefix}-${entry.name}.svg`, dir: subDir, files: subFiles })
+        groups.push({
+            key: `${entry.name}/${prefix}.svg`,
+            fileBase: `${prefix}-${entry.name}`,
+            dir: subDir,
+            files: subFiles,
+        })
     }
 
     return groups
@@ -111,11 +121,9 @@ export default function svgSpritePlugin(options = {}) {
             emitted.length = 0
             for (const group of collectSpriteGroups(inputDir, prefix)) {
                 const source = buildSpriteSvg(group.dir, group.files)
-                const base = group.logicalName.replace(/\.svg$/, '')
-                const hashedFileName = join(outputDir, `${base}-${hashContent(source)}.svg`)
-                const key = join(inputDir, group.logicalName)
+                const hashedFileName = join(outputDir, `${group.fileBase}-${hashContent(source)}.svg`)
                 this.emitFile({ type: 'asset', fileName: hashedFileName, source })
-                emitted.push({ key, fileName: hashedFileName })
+                emitted.push({ key: group.key, fileName: hashedFileName })
             }
         },
 

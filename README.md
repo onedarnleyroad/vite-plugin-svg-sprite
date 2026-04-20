@@ -82,24 +82,26 @@ Each SVG becomes a `<symbol>` with `id="svg-{filename}"`. For example, `arrow.sv
 
 ### With Vite manifest (recommended)
 
-With `build.manifest: true` enabled, each sprite is registered in `manifest.json` keyed by its `inputDir`-relative path:
+With `build.manifest: true` enabled, each sprite is registered in `manifest.json` under a purely logical key — the root sprite is `{prefix}.svg`, and each subfolder sprite is `{folder}/{prefix}.svg`:
 
 ```json
 {
-  "src/icons/sprite.svg":       { "file": "assets/sprite-DAskUDYW.svg",       "src": "src/icons/sprite.svg",       "isEntry": false },
-  "src/icons/sprite-light.svg": { "file": "assets/sprite-light-xV7q1sYy.svg", "src": "src/icons/sprite-light.svg", "isEntry": false }
+  "sprite.svg":       { "file": "assets/sprite-DAskUDYW.svg",       "src": "sprite.svg",       "isEntry": false },
+  "light/sprite.svg": { "file": "assets/sprite-light-xV7q1sYy.svg", "src": "light/sprite.svg", "isEntry": false }
 }
 ```
+
+These keys don't correspond to real files on disk — they're the handle you pass to your manifest consumer.
 
 With Craft CMS + [nystudio107/craft-vite](https://nystudio107.com/docs/vite/):
 
 ```twig
 <svg aria-hidden="true">
-  <use href="{{ craft.vite.entry('src/icons/sprite.svg') }}#svg-arrow"></use>
+  <use href="{{ craft.vite.entry('sprite.svg') }}#svg-arrow"></use>
 </svg>
 
 <svg aria-hidden="true">
-  <use href="{{ craft.vite.entry('src/icons/sprite-light.svg') }}#svg-sun"></use>
+  <use href="{{ craft.vite.entry('light/sprite.svg') }}#svg-sun"></use>
 </svg>
 ```
 
@@ -113,7 +115,7 @@ Sprites are generated at build time only — the plugin does **not** run during 
 vite build --watch
 ```
 
-Every edit under `inputDir` triggers a rebuild (a second or two), updates `manifest.json` with the new content hash, and `craft.vite.entry('src/icons/sprite.svg')` picks up the new URL on the next request. Not instant HMR, but avoids the CORS / cross-origin complications of trying to serve sprites through a separate dev port.
+Every edit under `inputDir` triggers a rebuild (a second or two), updates `manifest.json` with the new content hash, and `craft.vite.entry('sprite.svg')` picks up the new URL on the next request. Not instant HMR, but avoids the CORS / cross-origin complications of trying to serve sprites through a separate dev port.
 
 ### Without manifest
 
