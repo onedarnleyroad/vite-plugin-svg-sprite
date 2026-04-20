@@ -162,6 +162,7 @@ export default function svgSpritePlugin(options = {}) {
                 res.setHeader('Content-Type', 'image/svg+xml')
                 res.setHeader('Cache-Control', 'no-cache')
                 res.setHeader('Access-Control-Allow-Origin', '*')
+                res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
                 res.end(match)
             })
 
