@@ -5,12 +5,12 @@ A Vite plugin that builds SVG sprite sheets from a directory of SVG files — wi
 ## Features
 
 - Combines individual SVGs into a single `<svg>` sprite with `<symbol>` elements
-- **Content-hashed output** (e.g. `sprite-DAskUDYW.svg`) so browsers never serve stale sprites
+- **Content-hashed output** (e.g. `sprite-9a3f2c1e.svg`) so browsers never serve stale sprites
 - **Vite manifest integration** — works out of the box with [nystudio107's Craft Vite plugin](https://nystudio107.com/docs/vite/) and any other manifest consumer
 - **Multiple sprites from subfolders** — organise icons into `light/`, `dark/`, etc. and get one sprite per folder
 - Namespaces internal IDs to prevent conflicts across icons
-- **Preserves outer `<svg>` attributes** on the generated `<symbol>` — `fill="currentColor"`, `stroke`, `class`, `role`, `aria-*`, `data-*`, `style` (including CSS custom properties), etc. Only the truly wrapper-specific attributes are stripped: `xmlns`, `version`, `width`, `height`, and `id` (we set our own).
-- Preserves existing `<title>` elements, or falls back to the filename
+- **Preserves outer `<svg>` attributes** on the generated `<symbol>` — `fill="currentColor"`, `stroke`, `class`, `role`, `aria-*`, `data-*`, `style` (including CSS custom properties), etc. Only the truly wrapper-specific attributes are stripped: `xmlns` (and `xmlns:*` namespace declarations such as `xmlns:xlink`), `version`, `width`, `height`, and `id` (we set our own).
+- Preserves an existing `<title>`, or synthesizes one from the filename (`arrow.svg` → `arrow icon`)
 - Strips comments and empty `<defs>` blocks
 
 ## Installation
@@ -74,7 +74,7 @@ Each SVG becomes a `<symbol>` with `id="svg-{filename}"`. For example, `arrow.sv
 ```html
 <symbol id="svg-arrow" viewBox="0 0 24 24">
   <title>arrow icon</title>
-  <!-- ... -->
+  <path d="…"/>
 </symbol>
 ```
 
@@ -86,8 +86,8 @@ With `build.manifest: true` enabled, each sprite is registered in `manifest.json
 
 ```json
 {
-  "sprite.svg":       { "file": "assets/sprite-DAskUDYW.svg",       "src": "sprite.svg",       "isEntry": false },
-  "light/sprite.svg": { "file": "assets/sprite-light-xV7q1sYy.svg", "src": "light/sprite.svg", "isEntry": false }
+  "sprite.svg":       { "file": "assets/sprite-9a3f2c1e.svg",       "src": "sprite.svg",       "isEntry": false },
+  "light/sprite.svg": { "file": "assets/sprite-light-4b8d70e5.svg", "src": "light/sprite.svg", "isEntry": false }
 }
 ```
 
