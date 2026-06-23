@@ -61,7 +61,7 @@ The plugin is **build-only** — no `configureServer`, no dev middleware. For a 
 `buildSymbol` is the heart of the per-icon transform. Each icon:
 
 - Keeps an existing `<title>` if present, else synthesizes `"{name} icon"`.
-- Has comments, existing `<title>` tags, and empty `<defs>` stripped.
+- Has the XML prolog (`<?xml …?>`), DOCTYPE, comments, existing `<title>` tags, and empty `<defs>` stripped.
 - Has **all internal IDs namespaced with `{name}-`**, and every `url(#…)`, `href="#…"`, and `xlink:href="#…"` rewritten to match. This is what prevents collisions when many icons are inlined into one sprite.
 - Emits `<symbol id="svg-{name}" viewBox="…"><title>…</title>{inner}</symbol>`.
 

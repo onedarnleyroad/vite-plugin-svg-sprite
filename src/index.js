@@ -25,15 +25,16 @@ function buildSymbol(svg, name) {
     const title = existingTitle ?? `${name} icon`
 
     const cleaned = svg
+        .replace(/<\?xml[\s\S]*?\?>/gi, '')
+        .replace(/<!DOCTYPE[^>]*>/gi, '')
         .replace(/<!--[\s\S]*?-->/g, '')
         .replace(/<title[^>]*>[\s\S]*?<\/title>/gi, '')
         .replace(/<defs[^>]*>\s*<\/defs>/gi, '')
 
     const namespaced = cleaned
-        .replace(/\bid="([^"]+)"/g, `id="${name}-$1"`)
+        .replace(/(?<![\w-])id="([^"]+)"/g, `id="${name}-$1"`)
         .replace(/\burl\(#([^)]+)\)/g, `url(#${name}-$1)`)
-        .replace(/\bhref="#([^"]+)"/g, `href="#${name}-$1"`)
-        .replace(/\bxlink:href="#([^"]+)"/g, `xlink:href="#${name}-$1"`)
+        .replace(/\b(xlink:href|href)="#([^"]+)"/g, `$1="#${name}-$2"`)
 
     const openTag = namespaced.match(/<svg\b[^>]*>/i)?.[0] ?? ''
     const outerAttrs = extractOuterAttrs(openTag)

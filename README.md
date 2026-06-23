@@ -11,7 +11,7 @@ A Vite plugin that builds SVG sprite sheets from a directory of SVG files — wi
 - Namespaces internal IDs to prevent conflicts across icons
 - **Preserves outer `<svg>` attributes** on the generated `<symbol>` — `fill="currentColor"`, `stroke`, `class`, `role`, `aria-*`, `data-*`, `style` (including CSS custom properties), etc. Only the truly wrapper-specific attributes are stripped: `xmlns` (and `xmlns:*` namespace declarations such as `xmlns:xlink`), `version`, `width`, `height`, and `id` (we set our own).
 - Preserves an existing `<title>`, or synthesizes one from the filename (`arrow.svg` → `arrow icon`)
-- Strips comments and empty `<defs>` blocks
+- Strips comments, XML prolog / DOCTYPE declarations, and empty `<defs>` blocks
 
 ## Installation
 
