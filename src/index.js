@@ -9,13 +9,13 @@ function hashContent(content) {
 const STRIP_ATTRS = new Set(['xmlns', 'version', 'width', 'height', 'id'])
 
 function extractOuterAttrs(openTag) {
-    const attrRe = /\s+([a-zA-Z_][a-zA-Z0-9_:-]*)="([^"]*)"/g
+    const attrRe = /\s+([a-zA-Z_][a-zA-Z0-9_:-]*)=(["'])([\s\S]*?)\2/g
     const kept = []
     let m
     while ((m = attrRe.exec(openTag)) !== null) {
-        const [, attr, value] = m
+        const [, attr, quote, value] = m
         if (STRIP_ATTRS.has(attr) || attr.startsWith('xmlns:')) continue
-        kept.push(`${attr}="${value}"`)
+        kept.push(`${attr}=${quote}${value}${quote}`)
     }
     return kept.join(' ')
 }
@@ -32,9 +32,9 @@ function buildSymbol(svg, name) {
         .replace(/<defs[^>]*>\s*<\/defs>/gi, '')
 
     const namespaced = cleaned
-        .replace(/(?<![\w-])id="([^"]+)"/g, `id="${name}-$1"`)
+        .replace(/(?<![\w-])id=(["'])([^"']+)\1/g, (_, q, v) => `id=${q}${name}-${v}${q}`)
         .replace(/\burl\(#([^)]+)\)/g, `url(#${name}-$1)`)
-        .replace(/\b(xlink:href|href)="#([^"]+)"/g, `$1="#${name}-$2"`)
+        .replace(/\b(xlink:href|href)=(["'])#([^"']+)\2/g, (_, attr, q, v) => `${attr}=${q}#${name}-${v}${q}`)
 
     const openTag = namespaced.match(/<svg\b[^>]*>/i)?.[0] ?? ''
     const outerAttrs = extractOuterAttrs(openTag)
