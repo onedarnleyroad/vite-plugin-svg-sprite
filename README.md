@@ -188,6 +188,8 @@ If you want runtime/HMR injection or a virtual import, one of the others will su
 
 **Can I have more than one sprite?** Yes — each subfolder of `inputDir` becomes its own sprite, keyed `sprite-{folder}.svg`. See [Subfolders](#subfolders).
 
+**Can two icons share a filename across folders?** Yes. `arrow.svg` and `brand/arrow.svg` both become `<symbol id="svg-arrow">`, but in *separate* sprite files — and you reference each by its own sprite URL (`entry('sprite.svg')#svg-arrow` vs `entry('sprite-brand.svg')#svg-arrow`), so the file URL disambiguates them and they render fine on the same page. The ids only repeat *across* files, never within one; the only thing to avoid is inlining multiple sprites into a single document and referencing by bare `#svg-arrow`.
+
 **Does it run during `vite dev` / support HMR?** No — it's build-only. Run `vite build --watch` alongside your dev server for a live-ish loop.
 
 **Does it optimise SVGs (SVGO)?** No. It strips editor cruft (XML prolog, comments, empty `<defs>`) and collapses whitespace, but doesn't touch path data — it's intentionally zero-dependency. Run SVGO on your source files if you want optimisation (and set `removeViewBox: false`, since the symbols rely on `viewBox`).
