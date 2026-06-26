@@ -70,7 +70,6 @@ function collectSpriteGroups(inputDir, prefix) {
         .map(e => e.name)
     if (rootFiles.length > 0) {
         groups.push({
-            key: `${prefix}.svg`,
             fileBase: prefix,
             dir: absInput,
             files: rootFiles,
@@ -85,7 +84,6 @@ function collectSpriteGroups(inputDir, prefix) {
             .map(e => e.name)
         if (subFiles.length === 0) continue
         groups.push({
-            key: `${entry.name}/${prefix}.svg`,
             fileBase: `${prefix}-${entry.name}`,
             dir: subDir,
             files: subFiles,
@@ -124,7 +122,20 @@ export default function svgSpritePlugin(options = {}) {
                 const source = buildSpriteSvg(group.dir, group.files)
                 const hashedFileName = join(outputDir, `${group.fileBase}-${hashContent(source)}.svg`)
                 this.emitFile({ type: 'asset', fileName: hashedFileName, source })
-                emitted.push({ key: group.key, fileName: hashedFileName })
+                emitted.push({ key: `${group.fileBase}.svg`, fileName: hashedFileName })
+            }
+            // craft-vite resolves manifest keys with a first-hit substring test: if one key is a
+            // substring of another, entry() for the shorter key resolves ambiguously. Basename keys
+            // (sprite.svg, sprite-detail.svg) avoid this; warn if a prefix/folder name reintroduces it.
+            for (const a of emitted) {
+                for (const b of emitted) {
+                    if (a !== b && b.key.includes(a.key)) {
+                        this.warn(
+                            `[vite-plugin-svg-sprite] manifest key "${a.key}" is a substring of "${b.key}"; ` +
+                            `craft.vite.entry('${a.key}') may resolve ambiguously. Rename the prefix or folder to disambiguate.`
+                        )
+                    }
+                }
             }
         },
 

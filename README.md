@@ -82,12 +82,12 @@ Each SVG becomes a `<symbol>` with `id="svg-{filename}"`. For example, `arrow.sv
 
 ### With Vite manifest (recommended)
 
-With `build.manifest: true` enabled, each sprite is registered in `manifest.json` under a purely logical key — the root sprite is `{prefix}.svg`, and each subfolder sprite is `{folder}/{prefix}.svg`:
+With `build.manifest: true` enabled, each sprite is registered in `manifest.json` under a purely logical key — the root sprite is `{prefix}.svg`, and each subfolder sprite is `{prefix}-{folder}.svg`:
 
 ```json
 {
   "sprite.svg":       { "file": "assets/sprite-9a3f2c1e.svg",       "src": "sprite.svg",       "isEntry": false },
-  "light/sprite.svg": { "file": "assets/sprite-light-4b8d70e5.svg", "src": "light/sprite.svg", "isEntry": false }
+  "sprite-light.svg": { "file": "assets/sprite-light-4b8d70e5.svg", "src": "sprite-light.svg", "isEntry": false }
 }
 ```
 
@@ -101,11 +101,36 @@ With Craft CMS + [nystudio107/craft-vite](https://nystudio107.com/docs/vite/):
 </svg>
 
 <svg aria-hidden="true">
-  <use href="{{ craft.vite.entry('light/sprite.svg') }}#svg-sun"></use>
+  <use href="{{ craft.vite.entry('sprite-light.svg') }}#svg-sun"></use>
 </svg>
 ```
 
 `entry()` resolves the hashed URL from the manifest.
+
+#### A reusable, accessible macro
+
+Rather than hand-writing the `<svg><use>` wrapper each time, wrap it in a Twig macro. Pass `folder:` for a subfolder sprite — it maps to the `sprite-{folder}.svg` manifest key for you, so templates keep the folder mental model. Icons default to decorative (`aria-hidden="true"`), and switch to a labelled `role="img"` when the icon carries meaning on its own:
+
+```twig
+{% macro icon(name, folder = null, label = null, prefix = 'sprite', class = 'icon', extra = {}) %}
+  {% set key  = folder ? "#{prefix}-#{folder}.svg" : "#{prefix}.svg" %}
+  {% set a11y = label
+    ? { role: 'img', 'aria-label': label }
+    : { 'aria-hidden': 'true', focusable: 'false' } %}
+  <svg{{ attr({ class: class }|merge(a11y)|merge(extra)) }}>
+    <use href="{{ craft.vite.entry(key) }}#svg-{{ name }}"></use>
+  </svg>
+{% endmacro %}
+```
+
+```twig
+{{ icon('arrow') }}                                   {# root sprite → entry('sprite.svg') #}
+{{ icon('sun', folder: 'light') }}                    {# subfolder → entry('sprite-light.svg') #}
+{{ icon('search', label: 'Search') }}                 {# meaningful → role="img" + aria-label #}
+<button aria-label="Close">{{ icon('x') }}</button>   {# icon-only control: label the button #}
+```
+
+Reach for `aria-hidden="true"` only when the icon is decorative — i.e. sitting next to visible text. A standalone, meaning-bearing icon needs an accessible name (via `label`, or on the enclosing control such as a button), or it's invisible to assistive tech. (`attr()` is Craft's built-in attribute renderer.)
 
 ## Development workflow
 

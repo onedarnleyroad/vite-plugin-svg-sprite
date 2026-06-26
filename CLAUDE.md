@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-`@onedarnleyroad/vite-plugin-svg-sprite` is a Vite plugin that builds one or more SVG sprite sheets from a directory of `.svg` files. Sprites are emitted with content-hashed filenames and registered in Vite's build manifest under a purely logical key — `{prefix}.svg` for the root sprite, `{folder}/{prefix}.svg` for each subfolder sprite. These keys are the handle downstream tools like nystudio107's Craft Vite plugin look up via `craft.vite.entry('sprite.svg')`; they don't correspond to any real file on disk.
+`@onedarnleyroad/vite-plugin-svg-sprite` is a Vite plugin that builds one or more SVG sprite sheets from a directory of `.svg` files. Sprites are emitted with content-hashed filenames and registered in Vite's build manifest under a purely logical key — `{prefix}.svg` for the root sprite, `{prefix}-{folder}.svg` for each subfolder sprite. These keys are the handle downstream tools like nystudio107's Craft Vite plugin look up via `craft.vite.entry('sprite.svg')`; they don't correspond to any real file on disk.
 
 The entire plugin is implemented in [src/index.js](src/index.js). Zero dependencies beyond Node built-ins (`fs`, `path`, `crypto`).
 
 ## Package
 
 - ESM-only (`"type": "module"`)
-- No `scripts`, no build step, no test suite, no linter
+- No build step, test suite, or linter; `scripts` is an empty `{}` purely to silence an npm publish-time normalization warning (npm 10 flags a missing `scripts` field as an "auto-corrected" error)
 - Single export: `"." → "./src/index.js"`
 - Peer dependency: Vite ≥ 4.0.0
 - Current major: **v2** (breaking change from v1 — see README migration note). Check `package.json` for the exact version; v2 is currently shipping as beta tags on npm.
@@ -34,10 +34,11 @@ Passing `outputFile` (the v1 option) throws a migration error.
 
 `collectSpriteGroups(inputDir, prefix)` scans `inputDir` one level deep:
 
-Each group has two separate identifiers:
+Each group carries a single identifier:
 
-- `key` — the logical manifest handle: `{prefix}.svg` for the root group, `{folder}/{prefix}.svg` for each subfolder group.
-- `fileBase` — the on-disk basename prefix: `{prefix}` for root, `{prefix}-{folder}` for subfolders. Hashing and `outputDir` are applied to this, so all emitted files land flat under `assets/`.
+- `fileBase` — the on-disk basename prefix: `{prefix}` for root, `{prefix}-{folder}` for subfolders. The emitted file is `{fileBase}-{hash}.svg`, and the manifest key is derived as `{fileBase}.svg` (`sprite.svg` for root, `sprite-{folder}.svg` for subfolders). Hashing and `outputDir` apply to `fileBase`, so all emitted files land flat under `assets/`.
+
+The basename key form is deliberate: craft-vite's `entry()` matches keys with a first-hit **substring** test, so a path-style key like `{folder}/{prefix}.svg` would contain `sprite.svg` and make the root lookup ambiguous. `generateBundle` emits a build warning if any two emitted keys ever substring-collide.
 
 Rules:
 
@@ -50,7 +51,7 @@ Rules:
 1. For each group, `buildSpriteSvg` produces the full `<svg>…</svg>` string.
 2. A short content hash (`sha256 → hex → 8 chars`) is computed ourselves — we can't rely on Vite's auto-hashing via `name:` because Vite's `assetFileNames` pattern discards any directory we put there, so we use `fileName:` instead and own the path + hash.
 3. `this.emitFile({ type: 'asset', fileName: '{outputDir}/{fileBase}-{hash}.svg', source })` writes the asset at the exact path we chose.
-4. In `writeBundle`, if `build.manifest` is truthy, we read the manifest Vite just wrote (`.vite/manifest.json` or the custom path from `build.manifest` when it's a string), merge our entries keyed by logical `key`, and write it back. Vite's built-in manifest plugin does **not** include emitted assets unless they're imported by a chunk, so this post-hoc merge is necessary.
+4. In `writeBundle`, if `build.manifest` is truthy, we read the manifest Vite just wrote (`.vite/manifest.json` or the custom path from `build.manifest` when it's a string), merge our entries keyed by `{fileBase}.svg`, and write it back. Vite's built-in manifest plugin does **not** include emitted assets unless they're imported by a chunk, so this post-hoc merge is necessary.
 
 ### Dev mode
 

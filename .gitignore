@@ -1,1 +1,12 @@
+# Dependencies
 node_modules/
+
+# npm pack / publish artifacts
+*.tgz
+
+# macOS
+.DS_Store
+
+# Editor directories
+.idea/
+.vscode/
