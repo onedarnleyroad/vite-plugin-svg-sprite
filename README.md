@@ -192,7 +192,7 @@ If you want runtime/HMR injection or a virtual import, one of the others will su
 
 **Does it run during `vite dev` / support HMR?** No — it's build-only. Run `vite build --watch` alongside your dev server for a live-ish loop.
 
-**Does it optimise SVGs (SVGO)?** No. It strips editor cruft (XML prolog, comments, empty `<defs>`) and collapses whitespace, but doesn't touch path data — it's intentionally zero-dependency. Run SVGO on your source files if you want optimisation (and set `removeViewBox: false`, since the symbols rely on `viewBox`).
+**Does it optimise SVGs?** No — it does light cleanup (strips the XML prolog / comments / empty `<defs>`, collapses whitespace, namespaces IDs), but it doesn't touch path data, so bring source SVGs that are already production-ready. Each icon needs a `viewBox` — the plugin strips `width`/`height` and scales from it.
 
 **Why are the manifest keys `sprite.svg` and `sprite-light.svg`, not paths?** Because nystudio107's `entry()` resolves keys with a substring match, and a path-style `light/sprite.svg` would collide with the root `sprite.svg`. Basename keys avoid that.
 
