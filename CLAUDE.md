@@ -64,6 +64,7 @@ The plugin is **build-only** — no `configureServer`, no dev middleware. For a 
 - Keeps an existing `<title>` if present, else synthesizes `"{name} icon"`.
 - Has the XML prolog (`<?xml …?>`), DOCTYPE, comments, existing `<title>` tags, and empty `<defs>` stripped.
 - Has **all internal IDs namespaced with `{name}-`**, and every `url(#…)`, `href="#…"`, and `xlink:href="#…"` rewritten to match. This is what prevents collisions when many icons are inlined into one sprite.
-- Emits `<symbol id="svg-{name}" viewBox="…"><title>…</title>{inner}</symbol>`.
+- Carries the source `<svg>`'s outer attributes onto the `<symbol>` (`viewBox`, `fill`, `class`, `role`, `aria-*`, `data-*`, `style`, …), stripping only `xmlns`/`xmlns:*`/`version`/`width`/`height`/`id` (see `extractOuterAttrs`). Attribute and reference rewrites handle both `"` and `'` quoting.
+- Emits `<symbol id="svg-{name}" {kept outer attrs}><title>…</title>{inner}</symbol>`.
 
 If you touch this logic, the ID-namespacing and its matching reference rewrites must stay in lockstep.

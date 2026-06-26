@@ -144,7 +144,7 @@ Every edit under `inputDir` triggers a rebuild (a second or two), updates `manif
 
 ### Without manifest
 
-You can reference the sprite directly if you don't use a manifest — but the filename will be hashed, so you'd need to read the hash yourself or disable hashing manually. The manifest-based flow is strongly recommended.
+You can reference a sprite file directly without a manifest, but its filename is always content-hashed — there's no option to turn hashing off — so you'd have to discover the emitted name yourself (e.g. by globbing `assets/sprite-*.svg`). The manifest-based flow is strongly recommended.
 
 ## Migrating from v1
 
