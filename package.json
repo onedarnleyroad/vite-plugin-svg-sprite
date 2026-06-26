@@ -15,10 +15,21 @@
     "vite-plugin",
     "svg",
     "sprite",
-    "svg-sprite"
+    "svg-sprite",
+    "svg-symbols",
+    "icons",
+    "manifest",
+    "craft-cms",
+    "nystudio107"
   ],
   "author": "One Darnley Road <hello@onedarnleyroad.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onedarnleyroad/vite-plugin-svg-sprite.git"
+  },
+  "homepage": "https://github.com/onedarnleyroad/vite-plugin-svg-sprite#readme",
+  "bugs": "https://github.com/onedarnleyroad/vite-plugin-svg-sprite/issues",
   "publishConfig": {
     "access": "public"
   },

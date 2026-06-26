@@ -1,6 +1,9 @@
 # @onedarnleyroad/vite-plugin-svg-sprite
 
-A Vite plugin that builds SVG sprite sheets from a directory of SVG files — with content-hashed filenames and full Vite manifest integration.
+[![npm (beta)](https://img.shields.io/npm/v/@onedarnleyroad/vite-plugin-svg-sprite/beta?label=npm)](https://www.npmjs.com/package/@onedarnleyroad/vite-plugin-svg-sprite)
+[![license](https://img.shields.io/npm/l/@onedarnleyroad/vite-plugin-svg-sprite)](./LICENSE)
+
+A Vite plugin that builds **content-hashed SVG sprite sheets** at build time and registers them in **Vite's manifest** — built for server-rendered apps like **Craft CMS** (via [nystudio107's Vite plugin](https://nystudio107.com/docs/vite/)), and works with any manifest consumer. Organise icons into folders to get one sprite per folder, and reference them from templates with no JavaScript.
 
 ## Features
 
@@ -166,6 +169,30 @@ svgSprite({
 ```
 
 Passing `outputFile` in v2 throws an error. Update your templates to read the sprite URL from Vite's manifest instead of hard-coding the path.
+
+## How this differs from other SVG sprite plugins
+
+Several Vite plugins generate SVG sprites; they mostly split by *how the sprite reaches the page*:
+
+- **Runtime injection** (e.g. [`vite-plugin-svg-icons`](https://github.com/vbenjs/vite-plugin-svg-icons)) injects the sprite into the DOM via a virtual import. Great for SPAs; needs JavaScript to run.
+- **Import-based** plugins expose each icon as a JS module or framework component. Great when your icons live in JS/JSX.
+- **This plugin is build-time and manifest-driven.** It emits content-hashed `.svg` files and registers them in Vite's manifest under stable logical keys, so a **server-rendered** template (Craft/Twig, Laravel/Blade, etc.) resolves the hashed URL with no JavaScript — e.g. `craft.vite.entry('sprite.svg')`. It also emits one sprite per subfolder.
+
+If you want runtime/HMR injection or a virtual import, one of the others will suit you better. If you render HTML on the server and resolve assets through a Vite manifest, this is built for that.
+
+## FAQ
+
+**Does it work with Craft CMS?** Yes — it's the primary target. With [nystudio107's Craft Vite plugin](https://nystudio107.com/docs/vite/), reference a sprite with `craft.vite.entry('sprite.svg')` (see [Using the sprite](#using-the-sprite)).
+
+**How do I reference an icon in a Twig template?** Use `<use href="{{ craft.vite.entry('sprite.svg') }}#svg-{name}">`, or the reusable [`icon()` macro](#a-reusable-accessible-macro).
+
+**Can I have more than one sprite?** Yes — each subfolder of `inputDir` becomes its own sprite, keyed `sprite-{folder}.svg`. See [Subfolders](#subfolders).
+
+**Does it run during `vite dev` / support HMR?** No — it's build-only. Run `vite build --watch` alongside your dev server for a live-ish loop.
+
+**Does it optimise SVGs (SVGO)?** No. It strips editor cruft (XML prolog, comments, empty `<defs>`) and collapses whitespace, but doesn't touch path data — it's intentionally zero-dependency. Run SVGO on your source files if you want optimisation (and set `removeViewBox: false`, since the symbols rely on `viewBox`).
+
+**Why are the manifest keys `sprite.svg` and `sprite-light.svg`, not paths?** Because nystudio107's `entry()` resolves keys with a substring match, and a path-style `light/sprite.svg` would collide with the root `sprite.svg`. Basename keys avoid that.
 
 ## License
 
