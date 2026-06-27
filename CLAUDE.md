@@ -14,7 +14,7 @@ The entire plugin is implemented in [src/index.js](src/index.js). Zero dependenc
 - No build step, test suite, or linter; `scripts` is an empty `{}` purely to silence an npm publish-time normalization warning (npm 10 flags a missing `scripts` field as an "auto-corrected" error)
 - Single export: `"." → "./src/index.js"`
 - Peer dependency: Vite ≥ 4.0.0
-- Current major: **v2** (breaking change from v1 — see README migration note). Check `package.json` for the exact version; v2 is currently shipping as beta tags on npm.
+- Current major: **v2** (breaking change from v1 — see README migration note). Check `package.json` for the exact version.
 
 ## API
 

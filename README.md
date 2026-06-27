@@ -1,6 +1,6 @@
 # @onedarnleyroad/vite-plugin-svg-sprite
 
-[![npm (beta)](https://img.shields.io/npm/v/@onedarnleyroad/vite-plugin-svg-sprite/beta?label=npm)](https://www.npmjs.com/package/@onedarnleyroad/vite-plugin-svg-sprite)
+[![npm](https://img.shields.io/npm/v/@onedarnleyroad/vite-plugin-svg-sprite)](https://www.npmjs.com/package/@onedarnleyroad/vite-plugin-svg-sprite)
 [![license](https://img.shields.io/npm/l/@onedarnleyroad/vite-plugin-svg-sprite)](./LICENSE)
 
 A Vite plugin that builds **content-hashed SVG sprite sheets** at build time and registers them in **Vite's manifest** — built for server-rendered apps like **Craft CMS** (via [nystudio107's Vite plugin](https://nystudio107.com/docs/vite/)), and works with any manifest consumer. Organise icons into folders to get one sprite per folder, and reference them from templates with no JavaScript.
