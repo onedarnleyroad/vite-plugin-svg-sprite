@@ -112,28 +112,30 @@ With Craft CMS + [nystudio107/craft-vite](https://nystudio107.com/docs/vite/):
 
 #### A reusable, accessible macro
 
-Rather than hand-writing the `<svg><use>` wrapper each time, wrap it in a Twig macro. Pass `folder:` for a subfolder sprite — it maps to the `sprite-{folder}.svg` manifest key for you, so templates keep the folder mental model. Icons default to decorative (`aria-hidden="true"`), and switch to a labelled `role="img"` when the icon carries meaning on its own:
+Rather than hand-writing the `<svg><use>` wrapper each time, wrap it in a Twig macro. The two things you set most often — the icon **name** and its **classes** — are positional; the rest (subfolder, accessible label, extra attributes) goes in an `options` hash. Icons default to decorative (`aria-hidden="true"`), and switch to a labelled `role="img"` when the icon carries meaning on its own:
 
 ```twig
-{% macro icon(name, folder = null, label = null, prefix = 'sprite', class = 'icon', extra = {}) %}
-  {% set key  = folder ? "#{prefix}-#{folder}.svg" : "#{prefix}.svg" %}
-  {% set a11y = label
+{% macro icon(name, classList = '', options = {}) %}
+  {% set folder = options.folder ?? null %}
+  {% set label  = options.label ?? null %}
+  {% set file   = folder ? "sprite-#{folder}.svg" : 'sprite.svg' %}
+  {% set a11y   = label
     ? { role: 'img', 'aria-label': label }
     : { 'aria-hidden': 'true', focusable: 'false' } %}
-  <svg{{ attr({ class: class }|merge(a11y)|merge(extra)) }}>
-    <use href="{{ craft.vite.entry(key) }}#svg-{{ name }}"></use>
+  <svg{{ attr({ class: classList }|merge(a11y)|merge(options.attrs ?? {})) }}>
+    <use href="{{ craft.vite.entry(file) }}#svg-{{ name }}"></use>
   </svg>
 {% endmacro %}
 ```
 
 ```twig
-{{ icon('arrow') }}                                   {# root sprite → entry('sprite.svg') #}
-{{ icon('sun', folder: 'light') }}                    {# subfolder → entry('sprite-light.svg') #}
-{{ icon('search', label: 'Search') }}                 {# meaningful → role="img" + aria-label #}
-<button aria-label="Close">{{ icon('x') }}</button>   {# icon-only control: label the button #}
+{{ icon('arrow', 'icon') }}                                  {# root sprite → entry('sprite.svg') #}
+{{ icon('sun', 'icon', { folder: 'light' }) }}               {# subfolder → entry('sprite-light.svg') #}
+{{ icon('search', 'icon', { label: 'Search' }) }}            {# meaningful → role="img" + aria-label #}
+<button aria-label="Close">{{ icon('x', 'icon') }}</button>  {# icon-only control: label the button #}
 ```
 
-Reach for `aria-hidden="true"` only when the icon is decorative — i.e. sitting next to visible text. A standalone, meaning-bearing icon needs an accessible name (via `label`, or on the enclosing control such as a button), or it's invisible to assistive tech. (`attr()` is Craft's built-in attribute renderer.)
+Reach for `aria-hidden="true"` only when the icon is decorative — i.e. sitting next to visible text. A standalone, meaning-bearing icon needs an accessible name (via `options.label`, or on the enclosing control such as a button), or it's invisible to assistive tech. (`'icon'` is a CSS class you define to size the `<svg>` — sprite symbols have no intrinsic dimensions; the walkthrough below covers sizing and colour. `attr()` is Craft's built-in attribute renderer.)
 
 > **Full Craft CMS walkthrough:** [SVG icon sprites in Craft CMS with Vite](https://github.com/onedarnleyroad/craftcms/wiki/SVG-icon-sprites-in-Craft-CMS-with-Vite) — end-to-end setup, the macro, sizing & colour gotchas, and sprites vs. inlining.
 
