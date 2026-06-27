@@ -135,6 +135,8 @@ Rather than hand-writing the `<svg><use>` wrapper each time, wrap it in a Twig m
 
 Reach for `aria-hidden="true"` only when the icon is decorative — i.e. sitting next to visible text. A standalone, meaning-bearing icon needs an accessible name (via `label`, or on the enclosing control such as a button), or it's invisible to assistive tech. (`attr()` is Craft's built-in attribute renderer.)
 
+> **Full Craft CMS walkthrough:** [SVG icon sprites in Craft CMS with Vite](https://github.com/onedarnleyroad/craftcms/wiki/SVG-icon-sprites-in-Craft-CMS-with-Vite) — end-to-end setup, the macro, sizing & colour gotchas, and sprites vs. inlining.
+
 ## Development workflow
 
 Sprites are generated at build time only — the plugin does **not** run during `vite dev`. For a live-ish dev loop, run a separate build watcher alongside your usual dev server:
@@ -182,7 +184,7 @@ If you want runtime/HMR injection or a virtual import, one of the others will su
 
 ## FAQ
 
-**Does it work with Craft CMS?** Yes — it's the primary target. With [nystudio107's Craft Vite plugin](https://nystudio107.com/docs/vite/), reference a sprite with `craft.vite.entry('sprite.svg')` (see [Using the sprite](#using-the-sprite)).
+**Does it work with Craft CMS?** Yes — it's the primary target. With [nystudio107's Craft Vite plugin](https://nystudio107.com/docs/vite/), reference a sprite with `craft.vite.entry('sprite.svg')` — see [Using the sprite](#using-the-sprite), or the full [Craft + Vite walkthrough](https://github.com/onedarnleyroad/craftcms/wiki/SVG-icon-sprites-in-Craft-CMS-with-Vite).
 
 **How do I reference an icon in a Twig template?** Use `<use href="{{ craft.vite.entry('sprite.svg') }}#svg-{name}">`, or the reusable [`icon()` macro](#a-reusable-accessible-macro).
 
